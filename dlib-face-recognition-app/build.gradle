@@ -15,6 +15,9 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
     }
 }
 
@@ -23,14 +26,14 @@ task clean(type: Delete) {
 }
 
 ext {
-    buildToolsVersion = '26.0.2'
-    compileSdkVersion = 25
+    buildToolsVersion = '28.0.3'
+    compileSdkVersion = 26
     minSdkVersion = 14
-    targetSdkVersion = 25
-    supportLibraryVersion = '25.3.1'
+    targetSdkVersion = 26
+    supportLibraryVersion = '27.1.0'
 
     releaseVersionCode = 1
     releaseVersionName = '1.0.3'
-    androidBuildToolsVersion = '26.0.2'
-    androidSupportSdkVersion = '25.3.1'
+    androidBuildToolsVersion = '28.0.3'
+    androidSupportSdkVersion = '27.1.0'
 }

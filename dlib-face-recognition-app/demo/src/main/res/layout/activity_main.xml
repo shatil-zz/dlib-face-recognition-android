@@ -16,7 +16,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    tools:context=".CheckEmployeeActivity"
     android:background="#000">
 
     <com.google.android.cameraview.CameraView

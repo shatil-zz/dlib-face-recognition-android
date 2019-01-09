@@ -17,12 +17,13 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_employee_recog"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Demo">
         <activity
-            android:name=".MainActivity"
+            android:name=".HomeActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,8 +32,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddPerson"
-            android:label="@string/title_activity_add_person"
+            android:name=".AddEmployeeActivity"
+            android:label="@string/title_add_employee"
+            android:theme="@style/Theme.Demo.NoActionBar"></activity>
+        <activity
+            android:name=".CheckEmployeeActivity"
+            android:label="@string/title_check_employee"
             android:theme="@style/Theme.Demo.NoActionBar"></activity>
     </application>
 

@@ -11,7 +11,7 @@
     limitations under the License.
 -->
 <resources>
-    <string name="app_name">Dlib Face Recognition</string>
+    <string name="app_name">Employee Recognition</string>
     <string name="camera_permission_confirmation">This app demonstrates the usage of CameraView. In order to do that, it needs permission to access camera.</string>
     <string name="camera_permission_not_granted">Camera app cannot do anything without camera permission.</string>
     <string name="picture_taken">Picture taken</string>
@@ -23,5 +23,7 @@
     <string name="flash_on">Flash on</string>
     <string name="take_picture">Recognize</string>
     <string name="add_person">Add</string>
-    <string name="title_activity_add_person">AddPerson</string>
+    <string name="title_add_employee">Add Employee</string>
+    <string name="title_check_employee">Check Employee</string>
+    <string name="home">Home</string>
 </resources>

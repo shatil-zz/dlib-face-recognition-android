@@ -19,7 +19,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,7 +36,7 @@ import java.io.IOException;
 import java.util.List;
 
 // Copy the person image renamed to his name into the dlib image directory
-public class AddPerson extends AppCompatActivity {
+public class AddEmployeeActivity extends AppCompatActivity {
 
     EditText et_name, et_image;
     Button btn_select_image, btn_add;
@@ -98,7 +97,7 @@ public class AddPerson extends AppCompatActivity {
                 case R.id.btn_add:
                     String targetPath = Constants.getDLibImageDirectoryPath() + "/" + et_name.getText().toString() + ".jpg";
                     FileUtils.copyFile(imgPath,targetPath);
-                    Intent i = new Intent(AddPerson.this,MainActivity.class);
+                    Intent i = new Intent(AddEmployeeActivity.this,CheckEmployeeActivity.class);
                     startActivity(i);
                     finish();
                     break;
@@ -113,7 +112,7 @@ public class AddPerson extends AppCompatActivity {
             int hasPerm = pm.checkPermission(Manifest.permission.CAMERA, getPackageName());
             if (hasPerm == PackageManager.PERMISSION_GRANTED) {
                 final CharSequence[] options = {"Take Photo", "Choose From Gallery","Cancel"};
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(AddPerson.this);
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(AddEmployeeActivity.this);
                 builder.setTitle("Select Option");
                 builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
@@ -191,7 +190,7 @@ public class AddPerson extends AppCompatActivity {
     private FaceRec mFaceRec;
 
     private class detectAsync extends AsyncTask<Bitmap, Void, String> {
-        ProgressDialog dialog = new ProgressDialog(AddPerson.this);
+        ProgressDialog dialog = new ProgressDialog(AddEmployeeActivity.this);
 
         @Override
         protected void onPreExecute() {
@@ -233,7 +232,7 @@ public class AddPerson extends AppCompatActivity {
             if(dialog != null && dialog.isShowing()){
                 dialog.dismiss();
                 if (result!=null) {
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(AddPerson.this);
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(AddEmployeeActivity.this);
                     builder1.setMessage(result);
                     builder1.setCancelable(true);
                     AlertDialog alert11 = builder1.create();

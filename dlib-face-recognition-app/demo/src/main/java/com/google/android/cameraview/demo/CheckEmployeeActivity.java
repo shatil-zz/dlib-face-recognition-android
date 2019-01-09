@@ -23,7 +23,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -68,8 +67,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 // This demo app uses dlib face recognition based on resnet
-public class MainActivity extends AppCompatActivity implements
-        ActivityCompat.OnRequestPermissionsResultCallback{
+public class CheckEmployeeActivity extends AppCompatActivity implements
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String TAG = "MainActivity";
     private static final int INPUT_SIZE = 500;
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements
                     }
                     break;
                 case R.id.add_person:
-                    Intent i = new Intent(MainActivity.this, AddPerson.class);
+                    Intent i = new Intent(CheckEmployeeActivity.this, AddEmployeeActivity.class);
                     startActivity(i);
                     finish();
                     break;
@@ -157,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private class initRecAsync extends AsyncTask<Void, Void, Void> {
-        ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+        ProgressDialog dialog = new ProgressDialog(CheckEmployeeActivity.this);
 
         @Override
         protected void onPreExecute() {
@@ -179,10 +178,10 @@ public class MainActivity extends AppCompatActivity implements
                 File image_folder = new File(Constants.getDLibImageDirectoryPath());
                 image_folder.mkdirs();
                 if (!new File(Constants.getFaceShapeModelPath()).exists()) {
-                    FileUtils.copyFileFromRawToOthers(MainActivity.this, R.raw.shape_predictor_5_face_landmarks, Constants.getFaceShapeModelPath());
+                    FileUtils.copyFileFromRawToOthers(CheckEmployeeActivity.this, R.raw.shape_predictor_5_face_landmarks, Constants.getFaceShapeModelPath());
                 }
                 if (!new File(Constants.getFaceDescriptorModelPath()).exists()) {
-                    FileUtils.copyFileFromRawToOthers(MainActivity.this, R.raw.dlib_face_recognition_resnet_model_v1, Constants.getFaceDescriptorModelPath());
+                    FileUtils.copyFileFromRawToOthers(CheckEmployeeActivity.this, R.raw.dlib_face_recognition_resnet_model_v1, Constants.getFaceDescriptorModelPath());
                 }
             } else {
                 //Log.d(TAG, "error in setting dlib_rec_example directory");
@@ -194,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         protected void onPostExecute(Void result) {
-            if(dialog != null && dialog.isShowing()){
+            if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
             }
         }
@@ -263,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-            @NonNull int[] grantResults) {
+                                           @NonNull int[] grantResults) {
         if (requestCode == 100) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -316,17 +315,17 @@ public class MainActivity extends AppCompatActivity implements
             msg = "No face detected or Unknown person";
 
         } else {
-            for(int i=0; i<names.size(); i++) {
-                msg += names.get(i).split(Pattern.quote("."))[0];
-                if (i!=names.size()-1) msg+=", ";
+            for (int i = 0; i < names.size(); i++) {
+                msg += names.get(i);
+                if (i != names.size() - 1) msg += ", ";
             }
-            msg+=" found!";
+            msg += " found!";
         }
         return msg;
     }
 
     private class recognizeAsync extends AsyncTask<Bitmap, Void, ArrayList<String>> {
-        ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+        ProgressDialog dialog = new ProgressDialog(CheckEmployeeActivity.this);
         private int mScreenRotation = 0;
         private boolean mIsComputing = false;
         private Bitmap mCroppedBitmap = Bitmap.createBitmap(INPUT_SIZE, INPUT_SIZE, Bitmap.Config.ARGB_8888);
@@ -351,16 +350,16 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "Time cost: " + String.valueOf((endTime - startTime) / 1000f) + " sec");
 
             ArrayList<String> names = new ArrayList<>();
-            for(VisionDetRet n:results) {
-                names.add(n.getLabel());
+            for (VisionDetRet n : results) {
+                names.add(n.getLabel().split(Pattern.quote("."))[0] + "(" + n.getConfidence() + ")");
             }
             return names;
         }
 
         protected void onPostExecute(ArrayList<String> names) {
-            if(dialog != null && dialog.isShowing()){
+            if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(CheckEmployeeActivity.this);
                 builder1.setMessage(getResultMessage(names));
                 builder1.setCancelable(true);
                 AlertDialog alert11 = builder1.create();
@@ -442,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements
         private static final String ARG_NOT_GRANTED_MESSAGE = "not_granted_message";
 
         public static ConfirmationDialogFragment newInstance(@StringRes int message,
-                String[] permissions, int requestCode, @StringRes int notGrantedMessage) {
+                                                             String[] permissions, int requestCode, @StringRes int notGrantedMessage) {
             ConfirmationDialogFragment fragment = new ConfirmationDialogFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_MESSAGE, message);
