@@ -17,8 +17,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,7 +36,7 @@ import java.util.List;
 // Copy the person image renamed to his name into the dlib image directory
 public class AddEmployeeActivity extends AppCompatActivity {
 
-    EditText et_name, et_image;
+    EditText et_name, et_id, et_image;
     Button btn_select_image, btn_add;
     int BITMAP_QUALITY = 100;
     int MAX_IMAGE_SIZE = 500;
@@ -52,39 +50,14 @@ public class AddEmployeeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_person);
-
-        btn_select_image = (Button)findViewById(R.id.btn_select_image);
-        btn_add = (Button)findViewById(R.id.btn_add);
-        et_name = (EditText)findViewById(R.id.et_name);
-        et_image = (EditText)findViewById(R.id.et_image);
-
+        btn_select_image = findViewById(R.id.btn_select_image);
+        btn_add = findViewById(R.id.btn_add);
+        et_name = findViewById(R.id.et_name);
+        et_id = findViewById(R.id.et_id);
+        et_image = findViewById(R.id.et_image);
         btn_select_image.setOnClickListener(mOnClickListener);
         btn_add.setOnClickListener(mOnClickListener);
-        btn_add.setEnabled(false);
-
-        et_name.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable arg0) {
-                imgPath = null;
-                et_image.setText("");
-                enableSubmitIfReady();
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-        });
-
         destination = new File(Constants.getDLibDirectoryPath() + "/temp.jpg");
-    }
-
-    public void enableSubmitIfReady() {
-        boolean isReady = et_name.getText().toString().length() > 0 && imgPath!=null;
-        btn_add.setEnabled(isReady);
     }
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
@@ -95,15 +68,47 @@ public class AddEmployeeActivity extends AppCompatActivity {
                     selectImage();
                     break;
                 case R.id.btn_add:
-                    String targetPath = Constants.getDLibImageDirectoryPath() + "/" + et_name.getText().toString() + ".jpg";
-                    FileUtils.copyFile(imgPath,targetPath);
-                    Intent i = new Intent(AddEmployeeActivity.this,CheckEmployeeActivity.class);
-                    startActivity(i);
-                    finish();
+                    if (isReadyToAdd()) {
+                        String targetPath = Constants.getDLibImageDirectoryPath() + "/" + getId() + ".jpg";
+                        FileUtils.copyFile(imgPath, targetPath);
+                        EmployeeData employeeData = EmployeeData.get(getApplicationContext());
+                        employeeData.setEmployeeName(getId(), getName());
+                        employeeData.setEmployeeImageUrl(getId(), targetPath);
+                        employeeData.commit();
+                        Intent intent = new Intent(getApplicationContext(), EmployeeDetailsActivity.class);
+                        intent.putExtra("id", getId());
+                        startActivity(intent);
+                        finish();
+                    }
                     break;
             }
         }
     };
+
+    private boolean isReadyToAdd() {
+        boolean isReady = true;
+        if (getName().length() == 0) {
+            et_name.setError("Enter name");
+            isReady = false;
+        }
+        if (getId().length() == 0) {
+            et_id.setError("Enter Id");
+            isReady = false;
+        }
+        if (imgPath == null) {
+            Toast.makeText(this, "Please set a face", Toast.LENGTH_SHORT).show();
+            isReady = false;
+        }
+        return isReady;
+    }
+
+    private String getName() {
+        return et_name.getText().toString().trim();
+    }
+
+    private String getId() {
+        return et_id.getText().toString().trim();
+    }
 
     // Select image from camera and gallery
     private void selectImage() {
@@ -111,7 +116,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
             PackageManager pm = getPackageManager();
             int hasPerm = pm.checkPermission(Manifest.permission.CAMERA, getPackageName());
             if (hasPerm == PackageManager.PERMISSION_GRANTED) {
-                final CharSequence[] options = {"Take Photo", "Choose From Gallery","Cancel"};
+                final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(AddEmployeeActivity.this);
                 builder.setTitle("Select Option");
                 builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -205,7 +210,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
             List<VisionDetRet> results;
             results = mFaceRec.detect(bp[0]);
             String msg = null;
-            if (results.size()==0) {
+            if (results.size() == 0) {
                 msg = "No face was detected or face was too small. Please select a different image";
             } else if (results.size() > 1) {
                 msg = "More than one face was detected. Please select a different image";
@@ -229,9 +234,9 @@ public class AddEmployeeActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(String result) {
-            if(dialog != null && dialog.isShowing()){
+            if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
-                if (result!=null) {
+                if (result != null) {
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(AddEmployeeActivity.this);
                     builder1.setMessage(result);
                     builder1.setCancelable(true);
@@ -240,7 +245,6 @@ public class AddEmployeeActivity extends AppCompatActivity {
                     imgPath = null;
                     et_image.setText("");
                 }
-                enableSubmitIfReady();
             }
 
         }

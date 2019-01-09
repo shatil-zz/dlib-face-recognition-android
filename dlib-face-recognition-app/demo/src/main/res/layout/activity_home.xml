@@ -9,16 +9,18 @@
 
     <Button
         android:id="@+id/tv_add_employee"
-        android:background="@drawable/bg_rectangle_transparent_blue"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="55dp"
         android:layout_marginBottom="10dp"
-        android:text="@string/title_add_employee" />
+        android:background="@drawable/bg_rectangle_transparent_blue"
+        android:text="@string/title_add_employee"
+        android:textColor="@color/btn_text_color" />
 
     <Button
         android:id="@+id/tv_check_employee"
-        android:background="@drawable/bg_rectangle_transparent_blue"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="@string/title_check_employee" />
+        android:layout_height="55dp"
+        android:background="@drawable/bg_rectangle_transparent_blue"
+        android:text="@string/title_check_employee"
+        android:textColor="@color/btn_text_color" />
 </LinearLayout>

@@ -24,6 +24,7 @@
     <color name="colorPending">#ffff8800</color>
     <color name="yellow">#FFD400</color>
     <color name="normal_black">#555555</color>
+    <color name="btn_text_color">#ffffff</color>
     <color name="color_home_icon">#005aaa</color>
     <color name="navigation_background">#66b2ff</color>
     <color name="navigation_background1">#cce5ff</color>

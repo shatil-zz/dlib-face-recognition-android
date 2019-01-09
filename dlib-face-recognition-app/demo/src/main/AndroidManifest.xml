@@ -23,8 +23,8 @@
         android:theme="@style/Theme.Demo">
         <activity
             android:name=".HomeActivity"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,8 +36,12 @@
             android:label="@string/title_add_employee"
             android:theme="@style/Theme.Demo.NoActionBar"></activity>
         <activity
+            android:name=".EmployeeDetailsActivity"
+            android:label="@string/title_add_employee"
+            android:theme="@style/Theme.Demo.NoActionBar"></activity>
+        <activity
             android:name=".CheckEmployeeActivity"
-            android:label="@string/title_check_employee"
+            android:label="@string/title_employee_details"
             android:theme="@style/Theme.Demo.NoActionBar"></activity>
     </application>
 

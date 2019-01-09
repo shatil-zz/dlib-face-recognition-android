@@ -52,6 +52,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.cameraview.CameraView;
@@ -97,42 +98,38 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
 
     private Handler mBackgroundHandler;
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.take_picture:
-                    if (mCameraView != null) {
-                        mCameraView.takePicture();
-                    }
-                    break;
-                case R.id.add_person:
-                    Intent i = new Intent(CheckEmployeeActivity.this, AddEmployeeActivity.class);
-                    startActivity(i);
-                    finish();
-                    break;
-            }
-        }
-    };
+    Button btnRecognize;
+    EditText etId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_check_employee);
         checkPermissions();
 
         mCameraView = (CameraView) findViewById(R.id.camera);
         if (mCameraView != null) {
             mCameraView.addCallback(mCallback);
         }
-        Button fab = (Button) findViewById(R.id.take_picture);
-        if (fab != null) {
-            fab.setOnClickListener(mOnClickListener);
-        }
-        Button add_person = (Button) findViewById(R.id.add_person);
-        if (add_person != null) {
-            add_person.setOnClickListener(mOnClickListener);
+        btnRecognize = findViewById(R.id.take_picture);
+        etId = findViewById(R.id.et_id);
+        if (btnRecognize != null) {
+            btnRecognize.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    EmployeeData employeeData = EmployeeData.get(getApplicationContext());
+                    String id = getEmployeeId();
+                    if (mCameraView != null && id.length() > 0 && employeeData.hasDetails(id)) {
+                        mCameraView.takePicture();
+                    } else if (id.length() == 0) {
+                        etId.setError("Enter employee id");
+                    } else if (!employeeData.hasDetails(id)) {
+                        MsgUtils.showSnackBarDefault(btnRecognize, "Employee id not found");
+                    }
+                }
+            });
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -324,6 +321,20 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
         return msg;
     }
 
+    private boolean isMatchedWithId(ArrayList<String> ids) {
+        String inputId = getEmployeeId();
+        for (String id : ids) {
+            if (inputId.length() > 0 && inputId.equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getEmployeeId() {
+        return etId.getText().toString().trim();
+    }
+
     private class recognizeAsync extends AsyncTask<Bitmap, Void, ArrayList<String>> {
         ProgressDialog dialog = new ProgressDialog(CheckEmployeeActivity.this);
         private int mScreenRotation = 0;
@@ -349,21 +360,24 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
             long endTime = System.currentTimeMillis();
             Log.d(TAG, "Time cost: " + String.valueOf((endTime - startTime) / 1000f) + " sec");
 
-            ArrayList<String> names = new ArrayList<>();
+            ArrayList<String> ids = new ArrayList<>();
             for (VisionDetRet n : results) {
-                names.add(n.getLabel().split(Pattern.quote("."))[0] + "(" + n.getConfidence() + ")");
+                ids.add(n.getLabel().split(Pattern.quote("."))[0]);
             }
-            return names;
+            return ids;
         }
 
         protected void onPostExecute(ArrayList<String> names) {
             if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(CheckEmployeeActivity.this);
-                builder1.setMessage(getResultMessage(names));
-                builder1.setCancelable(true);
-                AlertDialog alert11 = builder1.create();
-                alert11.show();
+                Log.d("DetectedImages", getResultMessage(names));
+                if (!isMatchedWithId(names)) {
+                    MsgUtils.showSnackBarDefault(btnRecognize, "Face not matched");
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), EmployeeDetailsActivity.class);
+                    intent.putExtra("id", names.get(0));
+                    startActivity(intent);
+                }
             }
         }
 
@@ -425,8 +439,6 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
         @Override
         public void onPictureTaken(CameraView cameraView, final byte[] data) {
             Log.d(TAG, "onPictureTaken " + data.length);
-            Toast.makeText(cameraView.getContext(), R.string.picture_taken, Toast.LENGTH_SHORT)
-                    .show();
             Bitmap bp = BitmapFactory.decodeByteArray(data, 0, data.length);
             new recognizeAsync().execute(bp);
         }
