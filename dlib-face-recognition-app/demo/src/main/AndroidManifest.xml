@@ -42,7 +42,13 @@
         <activity
             android:name=".CheckEmployeeActivity"
             android:label="@string/title_employee_details"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/Theme.Demo.NoActionBar"></activity>
+        <activity
+            android:name=".InputEmployeeIdActivity"
+            android:label="@string/title_employee_id_input"
+            android:theme="@style/Theme.Demo.NoActionBar"
+            android:windowSoftInputMode="stateVisible"></activity>
     </application>
 
 </manifest>

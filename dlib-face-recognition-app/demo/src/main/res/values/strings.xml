@@ -26,5 +26,6 @@
     <string name="title_add_employee">Add Employee</string>
     <string name="title_check_employee">Check Employee</string>
     <string name="title_employee_details">Employee Details</string>
+    <string name="title_employee_id_input">Employee Id</string>
     <string name="home">Home</string>
 </resources>

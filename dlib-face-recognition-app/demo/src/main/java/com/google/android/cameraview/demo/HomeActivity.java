@@ -31,7 +31,7 @@ public class HomeActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (checkPermissions()) {
-                    startActivity(new Intent(getApplicationContext(), CheckEmployeeActivity.class));
+                    startActivity(new Intent(getApplicationContext(), InputEmployeeIdActivity.class));
                 }
             }
         });
