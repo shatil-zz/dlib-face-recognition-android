@@ -19,10 +19,8 @@
 package com.google.android.cameraview.demo;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -36,13 +34,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -53,7 +47,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.cameraview.CameraView;
 import com.tzutalin.dlib.Constants;
@@ -62,7 +55,6 @@ import com.tzutalin.dlib.VisionDetRet;
 
 import junit.framework.Assert;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -71,7 +63,7 @@ import java.util.regex.Pattern;
 public class CheckEmployeeActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "CheckActivity";
     private static final int INPUT_SIZE = 500;
 
     private static final int[] FLASH_OPTIONS = {
@@ -100,6 +92,7 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
 
     Button btnRecognize;
     EditText etId;
+    private FaceRec mFaceRec;
 
 
     @Override
@@ -107,7 +100,6 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_employee);
-        checkPermissions();
 
         mCameraView = (CameraView) findViewById(R.id.camera);
         if (mCameraView != null) {
@@ -140,8 +132,6 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
 
     }
 
-    private FaceRec mFaceRec;
-
     private void changeProgressDialogMessage(final ProgressDialog pd, final String msg) {
         Runnable changeMessage = new Runnable() {
             @Override
@@ -152,84 +142,14 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
         runOnUiThread(changeMessage);
     }
 
-    private class initRecAsync extends AsyncTask<Void, Void, Void> {
-        ProgressDialog dialog = new ProgressDialog(CheckEmployeeActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            Log.d(TAG, "initRecAsync onPreExecute called");
-            dialog.setMessage("Initializing...");
-            dialog.setCancelable(false);
-            dialog.show();
-            super.onPreExecute();
-        }
-
-        protected Void doInBackground(Void... args) {
-            // create dlib_rec_example directory in sd card and copy model files
-            File folder = new File(Constants.getDLibDirectoryPath());
-            boolean success = false;
-            if (!folder.exists()) {
-                success = folder.mkdirs();
-            }
-            if (success) {
-                File image_folder = new File(Constants.getDLibImageDirectoryPath());
-                image_folder.mkdirs();
-                if (!new File(Constants.getFaceShapeModelPath()).exists()) {
-                    FileUtils.copyFileFromRawToOthers(CheckEmployeeActivity.this, R.raw.shape_predictor_5_face_landmarks, Constants.getFaceShapeModelPath());
-                }
-                if (!new File(Constants.getFaceDescriptorModelPath()).exists()) {
-                    FileUtils.copyFileFromRawToOthers(CheckEmployeeActivity.this, R.raw.dlib_face_recognition_resnet_model_v1, Constants.getFaceDescriptorModelPath());
-                }
-            } else {
-                //Log.d(TAG, "error in setting dlib_rec_example directory");
-            }
-            mFaceRec = new FaceRec(Constants.getDLibDirectoryPath());
-            changeProgressDialogMessage(dialog, "Adding people...");
-            mFaceRec.train();
-            return null;
-        }
-
-        protected void onPostExecute(Void result) {
-            if (dialog != null && dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        }
-    }
-
-    String[] permissions = new String[]{
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    };
-
-    private boolean checkPermissions() {
-        int result;
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String p : permissions) {
-            result = ContextCompat.checkSelfPermission(this, p);
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(p);
-            }
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
-            return false;
-        }
-        return true;
-    }
-
 
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume called");
         super.onResume();
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
             mCameraView.start();
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED) {
-            new initRecAsync().execute();
         }
     }
 
@@ -254,18 +174,6 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
                 mBackgroundHandler.getLooper().quit();
             }
             mBackgroundHandler = null;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == 100) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // do something
-            }
-            return;
         }
     }
 
@@ -338,7 +246,6 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
     private class recognizeAsync extends AsyncTask<Bitmap, Void, ArrayList<String>> {
         ProgressDialog dialog = new ProgressDialog(CheckEmployeeActivity.this);
         private int mScreenRotation = 0;
-        private boolean mIsComputing = false;
         private Bitmap mCroppedBitmap = Bitmap.createBitmap(INPUT_SIZE, INPUT_SIZE, Bitmap.Config.ARGB_8888);
 
         @Override
@@ -350,7 +257,10 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
         }
 
         protected ArrayList<String> doInBackground(Bitmap... bp) {
-
+            if (mFaceRec == null) {
+                mFaceRec = new FaceRec(Constants.getDLibDirectoryPath());
+                mFaceRec.train();
+            }
             drawResizedBitmap(bp[0], mCroppedBitmap);
             Log.d(TAG, "byte to bitmap");
 
@@ -377,6 +287,7 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
                     Intent intent = new Intent(getApplicationContext(), EmployeeDetailsActivity.class);
                     intent.putExtra("id", names.get(0));
                     startActivity(intent);
+                    finish();
                 }
             }
         }
@@ -444,56 +355,5 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
         }
 
     };
-
-    public static class ConfirmationDialogFragment extends DialogFragment {
-
-        private static final String ARG_MESSAGE = "message";
-        private static final String ARG_PERMISSIONS = "permissions";
-        private static final String ARG_REQUEST_CODE = "request_code";
-        private static final String ARG_NOT_GRANTED_MESSAGE = "not_granted_message";
-
-        public static ConfirmationDialogFragment newInstance(@StringRes int message,
-                                                             String[] permissions, int requestCode, @StringRes int notGrantedMessage) {
-            ConfirmationDialogFragment fragment = new ConfirmationDialogFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_MESSAGE, message);
-            args.putStringArray(ARG_PERMISSIONS, permissions);
-            args.putInt(ARG_REQUEST_CODE, requestCode);
-            args.putInt(ARG_NOT_GRANTED_MESSAGE, notGrantedMessage);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @NonNull
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final Bundle args = getArguments();
-            return new AlertDialog.Builder(getActivity())
-                    .setMessage(args.getInt(ARG_MESSAGE))
-                    .setPositiveButton(android.R.string.ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    String[] permissions = args.getStringArray(ARG_PERMISSIONS);
-                                    if (permissions == null) {
-                                        throw new IllegalArgumentException();
-                                    }
-                                    ActivityCompat.requestPermissions(getActivity(),
-                                            permissions, args.getInt(ARG_REQUEST_CODE));
-                                }
-                            })
-                    .setNegativeButton(android.R.string.cancel,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Toast.makeText(getActivity(),
-                                            args.getInt(ARG_NOT_GRANTED_MESSAGE),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            })
-                    .create();
-        }
-
-    }
 
 }

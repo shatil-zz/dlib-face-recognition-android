@@ -46,6 +46,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
     private File destination = null;
     private String imgPath = null;
     private final int PICK_IMAGE_CAMERA = 1, PICK_IMAGE_GALLERY = 2;
+    private FaceRec mFaceRec;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,14 @@ public class AddEmployeeActivity extends AppCompatActivity {
         destination = new File(Constants.getDLibDirectoryPath() + "/temp.jpg");
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mFaceRec != null) {
+            mFaceRec.release();
+        }
+    }
+
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -70,16 +79,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
                     break;
                 case R.id.btn_add:
                     if (isReadyToAdd()) {
-                        String targetPath = Constants.getDLibImageDirectoryPath() + "/" + getId() + ".jpg";
-                        FileUtils.copyFile(imgPath, targetPath);
-                        EmployeeData employeeData = EmployeeData.get(getApplicationContext());
-                        employeeData.setEmployeeName(getId(), getName());
-                        employeeData.setEmployeeImageUrl(getId(), targetPath);
-                        employeeData.commit();
-                        Intent intent = new Intent(getApplicationContext(), EmployeeDetailsActivity.class);
-                        intent.putExtra("id", getId());
-                        startActivity(intent);
-                        finish();
+                        new addAsync().execute();
                     }
                     break;
             }
@@ -190,7 +190,43 @@ public class AddEmployeeActivity extends AppCompatActivity {
         return newBitmap;
     }
 
-    private FaceRec mFaceRec;
+    private class addAsync extends AsyncTask<Void, Void, Void> {
+        ProgressDialog dialog = new ProgressDialog(AddEmployeeActivity.this);
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Adding employee...");
+            dialog.setCancelable(false);
+            dialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //mFaceRec = new FaceRec(Constants.getDLibDirectoryPath());
+            //mFaceRec.train();
+            String targetPath = Constants.getDLibImageDirectoryPath() + "/" + getId() + ".jpg";
+            FileUtils.copyFile(imgPath, targetPath);
+            EmployeeData employeeData = EmployeeData.get(getApplicationContext());
+            employeeData.setEmployeeName(getId(), getName());
+            employeeData.setEmployeeImageUrl(getId(), targetPath);
+            employeeData.commit();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (dialog != null && dialog.isShowing()) {
+                dialog.dismiss();
+            }
+            Intent intent = new Intent(getApplicationContext(), EmployeeDetailsActivity.class);
+            intent.putExtra("id", getId());
+            startActivity(intent);
+            finish();
+        }
+    }
+
 
     private class detectAsync extends AsyncTask<Bitmap, Void, String> {
         ProgressDialog dialog = new ProgressDialog(AddEmployeeActivity.this);

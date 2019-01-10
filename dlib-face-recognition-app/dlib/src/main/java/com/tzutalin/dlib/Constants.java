@@ -16,7 +16,7 @@ public final class Constants {
 
     public static String getDLibDirectoryPath() {
         File sdcard = Environment.getExternalStorageDirectory();
-        String targetPath = sdcard.getAbsolutePath() + File.separator + "dlib_rec_example";
+        String targetPath = sdcard.getAbsolutePath() + File.separator + "EmployeeData";
         return targetPath;
     }
 
