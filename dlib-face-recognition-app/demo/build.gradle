@@ -41,6 +41,7 @@ dependencies {
     compile "com.android.support:design:$supportLibraryVersion"
     compile project(':library')
     compile project(':dlib')
+    compile 'de.hdodenhof:circleimageview:2.1.0'
 
     // Tests
     testCompile 'junit:junit:4.12'

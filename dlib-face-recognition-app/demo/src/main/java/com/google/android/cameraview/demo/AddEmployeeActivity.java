@@ -15,11 +15,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.tzutalin.dlib.Constants;
@@ -36,7 +36,8 @@ import java.util.List;
 // Copy the person image renamed to his name into the dlib image directory
 public class AddEmployeeActivity extends AppCompatActivity {
 
-    EditText et_name, et_id, et_image;
+    EditText et_name, et_id;
+    ImageView ivPhoto;
     Button btn_select_image, btn_add;
     int BITMAP_QUALITY = 100;
     int MAX_IMAGE_SIZE = 500;
@@ -54,7 +55,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
         btn_add = findViewById(R.id.btn_add);
         et_name = findViewById(R.id.et_name);
         et_id = findViewById(R.id.et_id);
-        et_image = findViewById(R.id.et_image);
+        ivPhoto = findViewById(R.id.iv_photo);
         btn_select_image.setOnClickListener(mOnClickListener);
         btn_add.setOnClickListener(mOnClickListener);
         destination = new File(Constants.getDLibDirectoryPath() + "/temp.jpg");
@@ -149,10 +150,8 @@ public class AddEmployeeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_CAMERA) {
             try {
-                Uri selectedImage = data.getData();
                 bitmap = (Bitmap) data.getExtras().get("data");
                 Bitmap scaledBitmap = scaleDown(bitmap, MAX_IMAGE_SIZE, true);
-                et_image.setText(destination.getAbsolutePath());
                 new detectAsync().execute(scaledBitmap);
 
             } catch (Exception e) {
@@ -163,7 +162,6 @@ public class AddEmployeeActivity extends AppCompatActivity {
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
                 Bitmap scaledBitmap = scaleDown(bitmap, MAX_IMAGE_SIZE, true);
-                et_image.setText(getRealPathFromURI(selectedImage));
                 new detectAsync().execute(scaledBitmap);
 
             } catch (Exception e) {
@@ -237,13 +235,11 @@ public class AddEmployeeActivity extends AppCompatActivity {
             if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
                 if (result != null) {
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(AddEmployeeActivity.this);
-                    builder1.setMessage(result);
-                    builder1.setCancelable(true);
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
+                    MsgUtils.showSnackBarDefault(btn_add, result);
                     imgPath = null;
-                    et_image.setText("");
+                    ivPhoto.setImageResource(R.drawable.ic_profile_icon);
+                } else {
+                    ivPhoto.setImageURI(Uri.parse(imgPath));
                 }
             }
 

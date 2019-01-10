@@ -8,6 +8,31 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_photo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/ic_profile_icon" />
+
+        <Button
+            android:id="@+id/btn_select_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_rectangle_transparent_blue"
+            android:padding="10dp"
+            android:text="Add Face"
+            android:textColor="#ffffff" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:orientation="vertical">
 
@@ -15,10 +40,10 @@
             android:id="@+id/et_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
             android:hint="Employee Name"
             android:inputType="text"
-            android:paddingLeft="10dp"
             android:textColor="#000"
             android:textColorHint="@color/black_semi_transparent"
             android:textSize="14dp" />
@@ -27,44 +52,12 @@
             android:id="@+id/et_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:hint="Employee Id"
             android:inputType="text"
-            android:paddingLeft="10dp"
             android:textColor="#000"
             android:textColorHint="@color/black_semi_transparent"
             android:textSize="14dp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
-
-
-        <EditText
-            android:id="@+id/et_image"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.9"
-            android:focusable="false"
-            android:gravity="center_vertical"
-            android:hint="Add Face"
-            android:inputType="number"
-            android:paddingLeft="10dp"
-            android:textColor="#000"
-            android:textColorHint="@color/black_semi_transparent"
-            android:textSize="14dp" />
-
-        <Button
-            android:id="@+id/btn_select_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/transparent_white_hex_8"
-            android:text="Add Face" />
-
-
     </LinearLayout>
 
 
