@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-// This demo app uses dlib face recognition based on resnet
 public class CheckEmployeeActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -93,6 +92,7 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
     Button btnRecognize;
     EditText etId;
     private FaceRec mFaceRec;
+    String employeeId;
 
 
     @Override
@@ -112,12 +112,12 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     EmployeeData employeeData = EmployeeData.get(getApplicationContext());
-                    String id = getEmployeeId();
-                    if (mCameraView != null && id.length() > 0 && employeeData.hasDetails(id)) {
+                    employeeId = getEmployeeId();
+                    if (mCameraView != null && employeeId.length() > 0 && employeeData.hasDetails(employeeId)) {
                         mCameraView.takePicture();
-                    } else if (id.length() == 0) {
+                    } else if (employeeId.length() == 0) {
                         etId.setError("Enter employee id");
-                    } else if (!employeeData.hasDetails(id)) {
+                    } else if (!employeeData.hasDetails(employeeId)) {
                         MsgUtils.showSnackBarDefault(btnRecognize, "Employee id not found");
                     }
                 }
@@ -258,7 +258,7 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
 
         protected ArrayList<String> doInBackground(Bitmap... bp) {
             if (mFaceRec == null) {
-                mFaceRec = new FaceRec(Constants.getDLibDirectoryPath());
+                mFaceRec = new FaceRec(Constants.getDLibDirectoryPath(employeeId));
                 mFaceRec.train();
             }
             drawResizedBitmap(bp[0], mCroppedBitmap);

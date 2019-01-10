@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,12 +42,13 @@ public class AddEmployeeActivity extends AppCompatActivity {
     Button btn_select_image, btn_add;
     int BITMAP_QUALITY = 100;
     int MAX_IMAGE_SIZE = 500;
-    String TAG = "AddPerson";
+    String TAG = "AddEmployeeActivity";
     private Bitmap bitmap;
     private File destination = null;
     private String imgPath = null;
     private final int PICK_IMAGE_CAMERA = 1, PICK_IMAGE_GALLERY = 2;
     private FaceRec mFaceRec;
+    String DEFAULT_DETECT_DIR = "detect";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
         ivPhoto = findViewById(R.id.iv_photo);
         btn_select_image.setOnClickListener(mOnClickListener);
         btn_add.setOnClickListener(mOnClickListener);
-        destination = new File(Constants.getDLibDirectoryPath() + "/temp.jpg");
+        destination = new File(Constants.getDLibDirectoryPath(DEFAULT_DETECT_DIR) + "/temp.jpg");
     }
 
     @Override
@@ -203,9 +205,8 @@ public class AddEmployeeActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            //mFaceRec = new FaceRec(Constants.getDLibDirectoryPath());
-            //mFaceRec.train();
-            String targetPath = Constants.getDLibImageDirectoryPath() + "/" + getId() + ".jpg";
+            createEmployeeDirectory(getId());
+            String targetPath = Constants.getDLibImageDirectoryPath(getId()) + "/" + getId() + ".jpg";
             FileUtils.copyFile(imgPath, targetPath);
             EmployeeData employeeData = EmployeeData.get(getApplicationContext());
             employeeData.setEmployeeName(getId(), getName());
@@ -240,7 +241,8 @@ public class AddEmployeeActivity extends AppCompatActivity {
         }
 
         protected String doInBackground(Bitmap... bp) {
-            mFaceRec = new FaceRec(Constants.getDLibDirectoryPath());
+            createLibDirectory(DEFAULT_DETECT_DIR);
+            mFaceRec = new FaceRec(Constants.getDLibDirectoryPath(DEFAULT_DETECT_DIR));
             List<VisionDetRet> results;
             results = mFaceRec.detect(bp[0]);
             String msg = null;
@@ -280,6 +282,37 @@ public class AddEmployeeActivity extends AppCompatActivity {
             }
 
         }
+    }
+
+    private File createLibDirectory(String dir) {
+        File folder = new File(Constants.getDLibDirectoryPath(dir));
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        return folder;
+    }
+
+    private void createEmployeeDirectory(String id) {
+        createLibDirectory(id);
+        File image_folder = new File(Constants.getDLibImageDirectoryPath(id));
+        if (!image_folder.exists()) {
+            image_folder.mkdirs();
+        }
+        if (!new File(Constants.getFaceShapeModelPath(id)).exists()) {
+            Log.d(TAG, "Copy Face shape model");
+            FileUtils.copyFileFromRawToOthers(getApplicationContext(), R.raw.shape_predictor_5_face_landmarks,
+                    Constants.getFaceShapeModelPath(id));
+        } else {
+            Log.d(TAG, "Face shape model already exists");
+        }
+        if (!new File(Constants.getFaceDescriptorModelPath(id)).exists()) {
+            Log.d(TAG, "Copy Face descriptor model");
+            FileUtils.copyFileFromRawToOthers(getApplicationContext(), R.raw.dlib_face_recognition_resnet_model_v1,
+                    Constants.getFaceDescriptorModelPath(id));
+        } else {
+            Log.d(TAG, "Face descriptor model already exists");
+        }
+        Log.d(TAG, "Try to copy finished");
     }
 
 }
