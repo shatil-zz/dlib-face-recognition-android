@@ -371,6 +371,12 @@ public class CheckEmployeeActivity extends AppCompatActivity implements
         public void onPictureTaken(CameraView cameraView, final byte[] data) {
             Log.d(TAG, "onPictureTaken " + data.length);
             Bitmap bp = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+            if (bp.getHeight() < bp.getWidth()) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(270);
+                bp = Bitmap.createBitmap(bp, 0, 0, bp.getWidth(), bp.getHeight(), matrix, true);
+            }
             ((ImageView) findViewById(R.id.iv_taken_image)).setImageBitmap(bp);
             new recognizeAsync().execute(bp);
         }
